@@ -7,4 +7,5 @@ class MainColor {
   static Color xUserColor = Colors.blueAccent;
   static Color oUserColor = Colors.yellowAccent;
   static Color white = Colors.white;
+  static Color transparent = Colors.transparent;
 }

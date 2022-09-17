@@ -26,77 +26,145 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double boardLength = MediaQuery.of(context).size.width;
+    MediaQueryData media = MediaQuery.of(context);
+
     return Scaffold(
       backgroundColor: MainColor.primaryColor,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "It's $player turn.",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 58,
+      body: media.orientation == Orientation.portrait
+          ? _setPortraitScreen(media.size.width)
+          : _setLandscapeScreen(media.size.width),
+    );
+  }
+
+  Widget _setPortraitScreen(double boardLength) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _initPlayerText(),
+        const SizedBox(
+          height: 20,
+        ),
+        _initField(boardLength),
+        const SizedBox(
+          height: 25,
+        ),
+        _initGameOverText(),
+        _initResetButton(),
+      ],
+    );
+  }
+
+  Widget _setLandscapeScreen(double boardLength) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          width: 100,
+        ),
+        Center(
+          child: _initField(boardLength / 2.3),
+        ),
+        const SizedBox(
+          width: 50,
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const SizedBox(
+              height: 25,
+            ),
+            _initPlayerText(),
+            const SizedBox(
+              height: 25,
+            ),
+            _initGameOverText(),
+            const SizedBox(
+              height: 25,
+            ),
+            _initResetButton(),
+            const SizedBox(
+              height: 25,
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  SizedBox _initField(double boardLength) {
+    return SizedBox(
+      width: boardLength,
+      height: boardLength,
+      child: _createPlayField(),
+    );
+  }
+
+  GridView _createPlayField() {
+    return GridView.count(
+      crossAxisCount: Game.boardLength ~/ 3,
+      padding: const EdgeInsets.all(16),
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      children: List.generate(Game.boardLength, (index) {
+        return InkWell(
+          splashColor: MainColor.transparent,
+          highlightColor: MainColor.transparent,
+          onTap: () {
+            if (!gameOver && game.board![index] == '') {
+              _processTap(index);
+            }
+          },
+          child: Container(
+            width: Game.blocSize,
+            height: Game.blocSize,
+            decoration: BoxDecoration(
+              color: MainColor.secondaryColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Text(
+                game.board![index],
+                style: TextStyle(
+                    color: game.board![index] == Player.x
+                        ? MainColor.xUserColor
+                        : MainColor.oUserColor,
+                    fontSize: 64),
+              ),
             ),
           ),
-          const SizedBox(
-            height: 20,
-          ),
-          SizedBox(
-            width: boardLength,
-            height: boardLength,
-            child: GridView.count(
-              crossAxisCount: Game.boardLength ~/ 3,
-              padding: const EdgeInsets.all(16),
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              children: List.generate(Game.boardLength, (index) {
-                return InkWell(
-                  onTap: () {
-                    if (!gameOver && game.board![index] == '') {
-                      _processTap(index);
-                    }
-                  },
-                  child: Container(
-                    width: Game.blocSize,
-                    height: Game.blocSize,
-                    decoration: BoxDecoration(
-                        color: MainColor.secondaryColor,
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Center(
-                      child: Text(
-                        game.board![index],
-                        style: TextStyle(
-                            color: game.board![index] == Player.x
-                                ? MainColor.xUserColor
-                                : MainColor.oUserColor,
-                            fontSize: 64),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-          const SizedBox(
-            height: 25,
-          ),
-          Text(
-            result,
-            style: TextStyle(
-              color: MainColor.white,
-              fontSize: 54,
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () => _restartGame(),
-            icon: const Icon(Icons.replay),
-            label: const Text(
-              'Repeat the game',
-            ),
-          ),
-        ],
+        );
+      }),
+    );
+  }
+
+  Text _initPlayerText() {
+    return Text(
+      "It's $player turn.",
+      style: TextStyle(
+        color: MainColor.white,
+        fontSize: 58,
+      ),
+    );
+  }
+
+  Text _initGameOverText() {
+    return Text(
+      result,
+      style: TextStyle(
+        color: MainColor.white,
+        fontSize: 54,
+      ),
+    );
+  }
+
+  ElevatedButton _initResetButton() {
+    return ElevatedButton.icon(
+      onPressed: () => _restartGame(),
+      icon: const Icon(Icons.replay),
+      label: const Text(
+        'Repeat the game',
       ),
     );
   }
